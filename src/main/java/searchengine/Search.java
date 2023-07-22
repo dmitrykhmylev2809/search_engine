@@ -185,31 +185,112 @@ public class Search {
             string = builder.toString();
         }
         List<String> req = morphologyAnalyzerRequestDTO.getReqLemmas();
-        Set<Integer> integerList = new TreeSet<>();
+        Map<String, Integer> integerList1 = new HashMap<>();
+ //       Set<Integer> integerList = new TreeSet<>();
         for (String s : req) {
-            integerList.addAll(analyzer.findLemmaIndexInText(string, s));
+            integerList1.put(s, analyzer.findLemmaIndexInText(string, s).get(0));
+ //           integerList.addAll(analyzer.findLemmaIndexInText(string, s));
         }
-        List<TreeSet<Integer>> indexesList = getSearchingIndexes(string, integerList);
+
+//        for (int key : integerList) {
+//
+//            int lengthShorts = 0;
+//            while (lengthShorts > 0 && !Character.isWhitespace(string.charAt(lengthShorts))) {
+//                lengthShorts++;
+//            }
+//
+//            String part1 = string.substring(0, key);
+//            String part2 = string.substring(key, lengthShorts);
+//            String part3 = string.substring(lengthShorts);
+//
+//            string = part1 + "<b>" + part2 + "</b>" + part3;
+//
+//        }
+
+
+
+        //       List<TreeSet<Integer>> indexesList = getSearchingIndexes(string, integerList);
         StringBuilder builder1 = new StringBuilder();
-        for (TreeSet<Integer> set : indexesList) {
-            int from = set.first();
-            int to = set.last();
-            Pattern pattern = Pattern.compile("\\p{Punct}|\\s");
-            Matcher matcher = pattern.matcher(string.substring(to));
-            int offset = 0;
-            if (matcher.find()){
-                offset = matcher.end();
+//        for (TreeSet<Integer> set : indexesList) {
+//            int from = set.first();
+//            int to = set.last();
+//            Pattern pattern = Pattern.compile("\\p{Punct}|\\s");
+//            Matcher matcher = pattern.matcher(string.substring(to));
+//            int offset = 0;
+//            if (matcher.find()){
+//                offset = matcher.end();
+//            }
+//            builder1.append("<b>")
+//                    .append(string, from, to + offset)
+//                    .append("</b>");
+//            if (!((string.length() - to) < 40)) {
+//                builder1.append(string, to + offset, string.indexOf(" ", to + offset + 100))
+//                        .append("... ");
+//            }
+//        }
+
+
+ //       int totalLength = 0;
+ //       boolean ellipsisAdded = false;
+
+
+
+//        String snippet = "";
+//        int reqQuantity = req.size();
+//        for (TreeSet<Integer> set : indexesList) {
+//            int from = set.first();
+//            int to = set.last();
+//            Pattern pattern = Pattern.compile("\\p{Punct}|\\s");
+//            Matcher matcher = pattern.matcher(string.substring(to));
+//            int offset = 0;
+//            if (matcher.find()) {
+//                offset = matcher.end();
+//            }
+//
+//            if (indexesList.size() != 1 && reqQuantity != 1) {
+//                snippet = "<b>" + string.substring(from, to + offset) + "</b>" + string.substring(to + offset);
+//                if (snippet.length() > 130) {
+//                    snippet = snippet.substring (0, 127) + " ... ";
+//                } else { snippet = snippet + "..."; }
+//            }
+//            else {
+//
+//                snippet = "<b>" + string.substring(from, to + offset) + "</b>" + string.substring(to + offset + 1, to + 250) + " ... ";
+//            }
+//                builder1.append(snippet);
+//        }
+
+
+            for (String val : integerList1.keySet()) {
+                int index = integerList1.get(val);
+                int shorts = integerList1.size();
+                int to = index + val.length();
+            int lengthShorts = to + 240 / shorts;
+            while (lengthShorts > 0 && !Character.isWhitespace(string.charAt(lengthShorts))) {
+                lengthShorts--;
             }
-            builder1.append("<b>")
-                    .append(string, from, to + offset)
-                    .append("</b>");
-            if (!((string.length() - to) < 40)) {
-                builder1.append(string, to + offset, string.indexOf(" ", to + offset + 100))
-                        .append("... ");
-            }
+
+//            String snippet = string.substring(key, lengthShorts);
+            String snippet = "<b>" + string.substring(index, to) + "</b>" + string.substring(to, lengthShorts);
+//            if (to < string.length()) {
+//                snippet += string.substring(to, to + 1) + " ... ";
+//            } else {
+                snippet += "...";
+ //           }
+
+            builder1.append(snippet);
         }
-        return builder1.toString();
+        string = builder1.toString();
+        for (String val : integerList1.keySet()) {
+            string = string.replaceAll(val,"<b>" + val + "</b>" );
+
+        }
+        string = string.replaceAll("<b>" + "<b>","<b>");
+        string = string.replaceAll("</b>" + "</b>","</b>" );
+
+        return string;
     }
+
 
     private List<TreeSet<Integer>> getSearchingIndexes (String string, Set<Integer> indexesOfBolt) {
         ArrayList<Integer> indexes = new ArrayList<>(indexesOfBolt);

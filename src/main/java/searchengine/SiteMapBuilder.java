@@ -20,25 +20,8 @@ public class SiteMapBuilder {
     }
 
     public void builtSiteMap() {
-
-//        String text = new ForkJoinPool().invoke(new ParseUrl(url, isInterrupted, searchSettings));
-
        Set<String> urlList = new ForkJoinPool().invoke(new ParseUrl(url, new HashSet<>()));
-
-//       StringBuilder result = new StringBuilder();
-//
-//        for (String lg : urlList) {
-//                String text = lg;
-//                if (!text.equals("")) {
-//                    result.append("\n");
-//                    result.append(text);
-//                }
-        siteMap = new ArrayList<>(urlList);
-//        siteMap = stringToList(text);
-    }
-
-    private List<String> stringToList (String text) {
-        return Arrays.stream(text.split("\n")).collect(Collectors.toList());
+       siteMap = new ArrayList<>(urlList);
     }
 
     public List<String> getSiteMap() {

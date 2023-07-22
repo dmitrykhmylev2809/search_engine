@@ -14,9 +14,9 @@ config:
   site:
     - url: https://www.playback.ru
       name: PlayBack.Ru
-#    - url: https://www.svetlovka.ru
-#      name: Библиотека
+    - url: https://www.svetlovka.ru
+      name: Библиотека
 #    - url: https://et-cetera.ru/mobile/
 #      name: Театр «Et Cetera»
-#    - url: https://skillbox.ru
-#      name: skillbox
+    - url: https://skillbox.ru
+      name: skillbox

@@ -14,7 +14,7 @@ public class Page {
     private int id;
     private String path;
     private int code;
-//    @Type(type = "text")
+
     @Column(columnDefinition = "LONGTEXT")
     private String content;
     @Column(name = "site_id")

@@ -1,6 +1,5 @@
 package searchengine;
 
-import org.springframework.transaction.annotation.Transactional;
 import searchengine.models.*;
 import searchengine.morphology.MorphologyAnalyzer;
 import searchengine.service.*;
@@ -77,9 +76,7 @@ public class SiteIndexing extends Thread{
         siteRepositoryService.save(site);
         List<Field> fieldList = getFieldListFromDB();
         try {
- //           while (!isStopped) {
              Page page = getSearchPage(searchUrl, site.getUrl(), site.getId());
- //            pageRepositoryService.save(page);
             Page checkPage = pageRepositoryService.getPage(searchUrl.replaceAll(site.getUrl(), ""));
             if (checkPage != null){
                 prepareDbToIndexing(checkPage);
@@ -102,7 +99,6 @@ public class SiteIndexing extends Thread{
             indexing.clear();
 
         }
- //       }
         catch (UnsupportedMimeTypeException e) {
             site.setLastError("Формат страницы не поддерживается: " + searchUrl);
             site.setStatus(Status.FAILED);
@@ -122,7 +118,6 @@ public class SiteIndexing extends Thread{
         siteRepositoryService.save(site);
     }
 
-//    @Transactional
     private void pageToDb(Page page) {
         pageRepositoryService.save(page);
     }
@@ -165,7 +160,6 @@ public class SiteIndexing extends Thread{
 
     private void lemmaToDB (TreeMap<String, Integer> lemmaMap, int siteId) {
         for (Map.Entry<String, Integer> lemma : lemmaMap.entrySet()) {
-  //          while (!isStopped) {
             String lemmaName = lemma.getKey();
             List<Lemma> lemma1 = lemmaRepositoryService.getLemma(lemmaName);
             Lemma lemma2 = lemma1.stream().
@@ -180,7 +174,6 @@ public class SiteIndexing extends Thread{
                 lemma2.setFrequency(++count);
                 lemmaRepositoryService.save(lemma2);
             }}
- //       }
     }
 
     private TreeMap<String, Float> indexingLemmas (TreeMap<String, Integer> lemmas, float weight) {

@@ -14,8 +14,8 @@ import java.util.Optional;
 public interface PageRepository extends CrudRepository<Page, Integer> {
     Page findByPath (String path);
 
-    @Transactional
-    Page save (Page page);
+//    @Transactional
+//    Page save (Page page);
 
     Optional<Page> findByIdAndSiteId (int id, int siteId);
 

@@ -14,9 +14,6 @@ import java.util.Optional;
 public interface PageRepository extends CrudRepository<Page, Integer> {
     Page findByPath (String path);
 
-//    @Transactional
-//    Page save (Page page);
-
     Optional<Page> findByIdAndSiteId (int id, int siteId);
 
     @Query(value = "SELECT count(*) from Page where site_id = :id")

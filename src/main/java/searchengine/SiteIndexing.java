@@ -196,7 +196,6 @@ public class SiteIndexing extends Thread{
         int pathId = page.getId();
         int siteId = page.getSiteId();
         for (Map.Entry<String, Float> lemma : map.entrySet()) {
- //           while (!isStopped) {
             String lemmaName = lemma.getKey();
             List<Lemma> lemma1 = lemmaRepositoryService.getLemma(lemmaName);
             for (Lemma l : lemma1) {
@@ -206,7 +205,6 @@ public class SiteIndexing extends Thread{
                     indexRepositoryService.save(indexing);
                 }
             }}
-  //      }
     }
 
     private void prepareDbToIndexing(Page page) {

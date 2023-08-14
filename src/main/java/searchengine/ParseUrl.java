@@ -30,18 +30,16 @@ public class ParseUrl extends RecursiveTask<Set<String>> {
     @Override
     protected Set<String> compute() {
         try {
-            Connection.Response response = Jsoup.connect(url).ignoreContentType(true).execute();
+            Connection.Response response = Jsoup.connect(url).ignoreContentType(true).timeout(25000).execute();
             int statusCode = response.statusCode();
             if (statusCode == 200) {
                 Document doc = response.parse();
-                Elements links = doc.select("a[href]");
+                Elements links = doc.select("a[href~=^[^#]+$]");
 
                 Set<String> childUrls = links.stream()
                         .map(link -> link.attr("abs:href"))
                         .filter(this::isSuitableLink)
                         .collect(Collectors.toSet());
-
-                childUrls.forEach(System.out::println);
 
                 if (!isStopped) {
                     Set<ParseUrl> subTasks = childUrls.stream()
@@ -67,10 +65,8 @@ public class ParseUrl extends RecursiveTask<Set<String>> {
     }
 
     private boolean isSuitableLink(String link) {
-        return link.startsWith(url) && !link.contains("#")
-                && !link.endsWith(".pdf")
-                && !link.contains("instagram.com")
-                && !link.contains("vk.com");
-
+        String mediaRegex =
+                "(.*/)*.+\\.(png|jpg|gif|bmp|jpeg|PNG|JPG|GIF|BMP|pdf|php|zip)$|[#]";
+        return link.startsWith(url) && !link.matches(mediaRegex);
     }
 }

@@ -154,9 +154,6 @@ public class Indexer {
             future.cancel(true);
             executor.shutdownNow();
             isThreadAlive = executor.awaitTermination(1, TimeUnit.MINUTES);
-//            if (!isThreadAlive) {
-//                isThreadAlive = executor.awaitTermination(1, TimeUnit.MINUTES);
-//            }
         }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

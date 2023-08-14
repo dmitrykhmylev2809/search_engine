@@ -22,6 +22,7 @@ public class SiteMapBuilder {
     public void builtSiteMap() {
        Set<String> urlList = new ForkJoinPool().invoke(new ParseUrl(url, new HashSet<>()));
        siteMap = new ArrayList<>(urlList);
+        System.out.println("Размер siteMap : " + siteMap.size());
     }
 
     public List<String> getSiteMap() {

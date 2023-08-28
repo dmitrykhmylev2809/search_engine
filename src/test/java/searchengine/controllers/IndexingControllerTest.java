@@ -9,8 +9,8 @@ import org.springframework.http.ResponseEntity;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import searchengine.service.IndexingService;
-import searchengine.service.responses.ApiResponse;
+import searchengine.dao.IndexingService;
+import searchengine.controllers.responses.ApiResponse;
 
 class IndexingControllerTest {
 

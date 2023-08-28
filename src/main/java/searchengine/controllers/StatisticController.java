@@ -1,7 +1,7 @@
 package searchengine.controllers;
 
-import searchengine.service.StatisticService;
-import searchengine.service.responses.StatisticApiResponse;
+import searchengine.dao.StatisticService;
+import searchengine.controllers.responses.StatisticApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

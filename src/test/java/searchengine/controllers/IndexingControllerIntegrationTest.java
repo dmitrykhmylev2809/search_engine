@@ -6,9 +6,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import searchengine.service.IndexingService;
-import searchengine.service.responses.ApiResponse;
-import searchengine.service.responses.TrueApiResponse;
+import searchengine.dao.IndexingService;
+import searchengine.controllers.responses.ApiResponse;
+import searchengine.controllers.responses.TrueApiResponse;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;

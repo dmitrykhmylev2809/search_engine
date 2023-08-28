@@ -1,8 +1,8 @@
 package searchengine.controllers;
 
-import searchengine.DTO.MorphologyAnalyzerRequestDTO;
-import searchengine.service.SearchService;
-import searchengine.service.responses.ApiResponse;
+import searchengine.dto.MorphologyAnalyzerRequestDTO;
+import searchengine.dao.SearchService;
+import searchengine.controllers.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

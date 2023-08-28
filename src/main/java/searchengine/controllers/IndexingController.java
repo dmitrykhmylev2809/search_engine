@@ -1,13 +1,13 @@
 package searchengine.controllers;
 
 
-import searchengine.service.responses.ApiResponse;
+import searchengine.controllers.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import searchengine.service.IndexingService;
+import searchengine.dao.IndexingService;
 
 @Controller
 

@@ -1,6 +1,6 @@
 package searchengine.url;
 
-import searchengine.dao.SearchSettings;
+import searchengine.config.SearchSettings;
 
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;

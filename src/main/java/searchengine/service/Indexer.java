@@ -1,7 +1,7 @@
 package searchengine.service;
 
 import org.springframework.stereotype.Service;
-import searchengine.dao.SearchSettings;
+import searchengine.config.SearchSettings;
 import searchengine.dao.SiteIndexingDao;
 import searchengine.dao.*;
 import searchengine.models.Field;

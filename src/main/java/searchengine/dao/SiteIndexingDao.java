@@ -1,5 +1,6 @@
 package searchengine.dao;
 
+import searchengine.config.SearchSettings;
 import searchengine.models.*;
 import searchengine.morphology.MorphologyAnalyzer;
 import org.jsoup.Connection;

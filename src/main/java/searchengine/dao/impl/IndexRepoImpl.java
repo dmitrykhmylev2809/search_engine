@@ -1,18 +1,18 @@
 package searchengine.dao.impl;
 
+import org.springframework.stereotype.Component;
 import searchengine.models.Indexing;
 import searchengine.repo.IndexRepository;
-import searchengine.dao.IndexRepositoryService;
-import org.springframework.stereotype.Service;
+import searchengine.dao.IndexRepositoryDao;
 
 import java.util.List;
 
-@Service
-public class IndexRepoServiceImpl implements IndexRepositoryService {
+@Component
+public class IndexRepoImpl implements IndexRepositoryDao {
 
     private final IndexRepository indexRepository;
 
-    public IndexRepoServiceImpl(IndexRepository indexRepository) {
+    public IndexRepoImpl(IndexRepository indexRepository) {
         this.indexRepository = indexRepository;
     }
 

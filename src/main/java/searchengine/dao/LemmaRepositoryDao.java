@@ -5,7 +5,7 @@ import searchengine.models.Lemma;
 
 import java.util.List;
 
-public interface LemmaRepositoryService {
+public interface LemmaRepositoryDao {
     List<Lemma> getLemma (String lemmaName);
     void save(Lemma lemma);
     long lemmaCount();

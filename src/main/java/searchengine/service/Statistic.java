@@ -2,10 +2,10 @@ package searchengine.service;
 
 import searchengine.models.Site;
 import searchengine.models.Status;
-import searchengine.dao.LemmaRepositoryService;
-import searchengine.dao.PageRepositoryService;
-import searchengine.dao.SiteRepositoryService;
-import searchengine.dao.StatisticService;
+import searchengine.dao.LemmaRepositoryDao;
+import searchengine.dao.PageRepositoryDao;
+import searchengine.dao.SiteRepositoryDao;
+import searchengine.dao.StatisticDao;
 import searchengine.dto.statisticDTO.StatisticsDetailedDTO;
 import searchengine.dto.statisticDTO.StatisticsDTO;
 import searchengine.dto.statisticDTO.StatisticsTotalDTO;
@@ -17,25 +17,25 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class Statistic implements StatisticService {
+public class Statistic implements StatisticDao {
 
     private static final Log log = LogFactory.getLog(Statistic.class);
 
-    private final SiteRepositoryService siteRepositoryService;
-    private final LemmaRepositoryService lemmaRepositoryService;
-    private final PageRepositoryService pageRepositoryService;
+    private final SiteRepositoryDao siteRepositoryDao;
+    private final LemmaRepositoryDao lemmaRepositoryDao;
+    private final PageRepositoryDao pageRepositoryDao;
 
-    public Statistic(SiteRepositoryService siteRepositoryService,
-                     LemmaRepositoryService lemmaRepositoryService,
-                     PageRepositoryService pageRepositoryService) {
-        this.siteRepositoryService = siteRepositoryService;
-        this.lemmaRepositoryService = lemmaRepositoryService;
-        this.pageRepositoryService = pageRepositoryService;
+    public Statistic(SiteRepositoryDao siteRepositoryDao,
+                     LemmaRepositoryDao lemmaRepositoryDao,
+                     PageRepositoryDao pageRepositoryDao) {
+        this.siteRepositoryDao = siteRepositoryDao;
+        this.lemmaRepositoryDao = lemmaRepositoryDao;
+        this.pageRepositoryDao = pageRepositoryDao;
     }
 
     public StatisticApiResponse getStatistic(){
         StatisticsTotalDTO statisticsTotalDTO = getTotal();
-        List<Site> siteList = siteRepositoryService.getAllSites();
+        List<Site> siteList = siteRepositoryDao.getAllSites();
         StatisticsDetailedDTO[] statisticsDetailedDTOS = new StatisticsDetailedDTO[siteList.size()];
         for (int i = 0; i < siteList.size(); i++) {
             statisticsDetailedDTOS[i] = getDetailed(siteList.get(i));
@@ -45,9 +45,9 @@ public class Statistic implements StatisticService {
     }
 
     private StatisticsTotalDTO getTotal(){
-        long sites = siteRepositoryService.siteCount();
-        long lemmas = lemmaRepositoryService.lemmaCount();
-        long pages = pageRepositoryService.pageCount();
+        long sites = siteRepositoryDao.siteCount();
+        long lemmas = lemmaRepositoryDao.lemmaCount();
+        long pages = pageRepositoryDao.pageCount();
         boolean isIndexing = isSitesIndexing();
         return new StatisticsTotalDTO(sites, pages, lemmas, isIndexing);
 
@@ -59,14 +59,14 @@ public class Statistic implements StatisticService {
         Status status = site.getStatus();
         long statusTime = site.getStatusTime().getTime();
         String error = site.getLastError();
-        long pages = pageRepositoryService.pageCount(site.getId());
-        long lemmas = lemmaRepositoryService.lemmaCount(site.getId());
+        long pages = pageRepositoryDao.pageCount(site.getId());
+        long lemmas = lemmaRepositoryDao.lemmaCount(site.getId());
         return new StatisticsDetailedDTO(url, name, status, statusTime, error, pages, lemmas);
     }
 
     private boolean isSitesIndexing(){
         boolean is = true;
-        for(Site s : siteRepositoryService.getAllSites()){
+        for(Site s : siteRepositoryDao.getAllSites()){
             if(!s.getStatus().equals(Status.INDEXED)){
                 is = false;
                 break;

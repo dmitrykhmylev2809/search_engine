@@ -4,7 +4,7 @@ import searchengine.models.Page;
 
 import java.util.Optional;
 
-public interface PageRepositoryService {
+public interface PageRepositoryDao {
     Page getPage (String pagePath);
     void save(Page page);
     Optional<Page> findPageById(int id);

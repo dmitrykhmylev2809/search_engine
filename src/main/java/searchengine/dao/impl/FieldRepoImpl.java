@@ -1,19 +1,19 @@
 package searchengine.dao.impl;
 
+import org.springframework.stereotype.Component;
 import searchengine.models.Field;
 import searchengine.repo.FieldRepository;
-import searchengine.dao.FieldRepositoryService;
-import org.springframework.stereotype.Service;
+import searchengine.dao.FieldRepositoryDao;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
-public class FieldRepoServiceImpl implements FieldRepositoryService {
+@Component
+public class FieldRepoImpl implements FieldRepositoryDao {
 
     private final FieldRepository fieldRepository;
 
-    public FieldRepoServiceImpl(FieldRepository fieldRepository) {
+    public FieldRepoImpl(FieldRepository fieldRepository) {
         this.fieldRepository = fieldRepository;
     }
 

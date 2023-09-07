@@ -1,18 +1,18 @@
 package searchengine.dao.impl;
 
+import org.springframework.stereotype.Component;
 import searchengine.models.Page;
 import searchengine.repo.PageRepository;
-import searchengine.dao.PageRepositoryService;
-import org.springframework.stereotype.Service;
+import searchengine.dao.PageRepositoryDao;
 
 import java.util.Optional;
 
-@Service
-public class PageRepoServiceImpl implements PageRepositoryService {
+@Component
+public class PageRepoImpl implements PageRepositoryDao {
 
     private final PageRepository pageRepository;
 
-    public PageRepoServiceImpl(PageRepository pageRepository) {
+    public PageRepoImpl(PageRepository pageRepository) {
         this.pageRepository = pageRepository;
     }
 

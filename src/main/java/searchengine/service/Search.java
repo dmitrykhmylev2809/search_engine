@@ -11,10 +11,10 @@ import searchengine.models.Lemma;
 import searchengine.models.Page;
 import searchengine.models.Site;
 import searchengine.morphology.MorphologyAnalyzer;
-import searchengine.dao.IndexRepositoryService;
-import searchengine.dao.LemmaRepositoryService;
-import searchengine.dao.PageRepositoryService;
-import searchengine.dao.SiteRepositoryService;
+import searchengine.dao.IndexRepositoryDao;
+import searchengine.dao.LemmaRepositoryDao;
+import searchengine.dao.PageRepositoryDao;
+import searchengine.dao.SiteRepositoryDao;
 import searchengine.controllers.responses.SearchApiResponse;
 
 import java.util.*;
@@ -23,23 +23,23 @@ import java.util.stream.Stream;
 @Service
 public class Search {
 
-    private final SiteRepositoryService siteRepositoryService;
-    private final IndexRepositoryService indexRepositoryService;
-    private final PageRepositoryService pageRepositoryService;
-    private final LemmaRepositoryService lemmaRepositoryService;
+    private final SiteRepositoryDao siteRepositoryDao;
+    private final IndexRepositoryDao indexRepositoryDao;
+    private final PageRepositoryDao pageRepositoryDao;
+    private final LemmaRepositoryDao lemmaRepositoryDao;
 
-    public Search(SiteRepositoryService siteRepositoryService,
-                  IndexRepositoryService indexRepositoryService,
-                  PageRepositoryService pageRepositoryService,
-                  LemmaRepositoryService lemmaRepositoryService) {
-        this.siteRepositoryService = siteRepositoryService;
-        this.indexRepositoryService = indexRepositoryService;
-        this.pageRepositoryService = pageRepositoryService;
-        this.lemmaRepositoryService = lemmaRepositoryService;
+    public Search(SiteRepositoryDao siteRepositoryDao,
+                  IndexRepositoryDao indexRepositoryDao,
+                  PageRepositoryDao pageRepositoryDao,
+                  LemmaRepositoryDao lemmaRepositoryDao) {
+        this.siteRepositoryDao = siteRepositoryDao;
+        this.indexRepositoryDao = indexRepositoryDao;
+        this.pageRepositoryDao = pageRepositoryDao;
+        this.lemmaRepositoryDao = lemmaRepositoryDao;
     }
 
     public SearchApiResponse searchService(MorphologyAnalyzerRequestDTO morphologyAnalyzerRequestDTO, String url, int offset, int limit) {
-        List<Site> siteList = siteRepositoryService.getAllSites();
+        List<Site> siteList = siteRepositoryDao.getAllSites();
         List<SearchDataDTO> listOfSearchData = new ArrayList<>();
         if (url == null) {
             for (Site s : siteList) {
@@ -48,7 +48,7 @@ public class Search {
                 listOfSearchData.addAll(getSortedSearchData(list, morphologyAnalyzerRequestDTO));
             }
         } else {
-            Site site = siteRepositoryService.getSite(url);
+            Site site = siteRepositoryDao.getSite(url);
             Map<Page, Double> list = searching(morphologyAnalyzerRequestDTO, site.getId());
             listOfSearchData.addAll(getSortedSearchData(list, morphologyAnalyzerRequestDTO));
         }
@@ -75,11 +75,11 @@ public class Search {
         List<Lemma> reqLemmas = sortedReqLemmas(morphologyAnalyzerRequestDTO, siteId);
         List<Integer> pageIndexes = new ArrayList<>();
         if (!reqLemmas.isEmpty()) {
-            List<Indexing> indexingList = indexRepositoryService.getAllIndexingByLemmaId(reqLemmas.get(0).getId());
+            List<Indexing> indexingList = indexRepositoryDao.getAllIndexingByLemmaId(reqLemmas.get(0).getId());
             indexingList.forEach(indexing -> pageIndexes.add(indexing.getPageId()));
             for (Lemma lemma : reqLemmas) {
                 if (!pageIndexes.isEmpty() && lemma.getId() != reqLemmas.get(0).getId()) {
-                    List<Indexing> indexingList2 = indexRepositoryService.getAllIndexingByLemmaId(lemma.getId());
+                    List<Indexing> indexingList2 = indexRepositoryDao.getAllIndexingByLemmaId(lemma.getId());
                     List<Integer> tempList = new ArrayList<>();
                     indexingList2.forEach(indexing -> tempList.add(indexing.getPageId()));
                     pageIndexes.retainAll(tempList);
@@ -90,7 +90,7 @@ public class Search {
             double maxRel = 0.0;
             for (Integer p : pageIndexes) {
                 Optional<Page> opPage;
-                opPage = pageRepositoryService.findPageByPageIdAndSiteId(p, siteId);
+                opPage = pageRepositoryDao.findPageByPageIdAndSiteId(p, siteId);
                 if (opPage.isPresent()) {
                     Page page = opPage.get();
                     double r = getAbsRelevance(page, reqLemmas);
@@ -121,7 +121,7 @@ public class Search {
         List<Lemma> lemmaList = new ArrayList<>();
         List<String> list = morphologyAnalyzerRequestDTO.getReqLemmas();
         for (String s : list) {
-            List<Lemma> reqLemmas = lemmaRepositoryService.getLemma(s);
+            List<Lemma> reqLemmas = lemmaRepositoryDao.getLemma(s);
             for (Lemma l : reqLemmas) {
                 if (l.getSiteId() == siteId) {
                     lemmaList.add(l);
@@ -137,7 +137,7 @@ public class Search {
         int pageId = page.getId();
         for (Lemma lemma : lemmas) {
             int lemmaId = lemma.getId();
-            Indexing indexing = indexRepositoryService.getIndexing(lemmaId, pageId);
+            Indexing indexing = indexRepositoryDao.getIndexing(lemmaId, pageId);
             r = r + indexing.getRank();
         }
         return r;
@@ -146,7 +146,7 @@ public class Search {
 
     private SearchDataDTO getResponseByPage(Page page, MorphologyAnalyzerRequestDTO morphologyAnalyzerRequestDTO, double relevance) {
         SearchDataDTO response = new SearchDataDTO();
-        Site site = siteRepositoryService.getSite(page.getSiteId());
+        Site site = siteRepositoryDao.getSite(page.getSiteId());
         String siteUrl = site.getUrl();
         String siteName = site.getName();
         String uri = page.getPath();

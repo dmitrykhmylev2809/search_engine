@@ -1,24 +1,24 @@
 package searchengine.dao.impl;
 
+import org.springframework.stereotype.Component;
 import searchengine.service.Search;
 import searchengine.dto.MorphologyAnalyzerRequestDTO;
-import searchengine.dao.SearchService;
+import searchengine.dao.SearchDao;
 import searchengine.controllers.responses.FalseApiResponse;
 import searchengine.controllers.responses.ApiResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
-@Service
-public class SearchServiceImpl implements SearchService {
+@Component
+public class SearchImpl implements SearchDao {
 
-    private static final Log log = LogFactory.getLog(SearchServiceImpl.class);
+    private static final Log log = LogFactory.getLog(SearchImpl.class);
 
     private final Search search;
 
-    public SearchServiceImpl(Search search) {
+    public SearchImpl(Search search) {
         this.search = search;
     }
 

@@ -1,19 +1,19 @@
 package searchengine.dao.impl;
 
+import org.springframework.stereotype.Component;
 import searchengine.models.Indexing;
 import searchengine.models.Lemma;
 import searchengine.repo.LemmaRepository;
-import searchengine.dao.LemmaRepositoryService;
-import org.springframework.stereotype.Service;
+import searchengine.dao.LemmaRepositoryDao;
 
 import java.util.List;
 
-@Service
-public class LemmaRepoServiceImpl implements LemmaRepositoryService {
+@Component
+public class LemmaRepoImpl implements LemmaRepositoryDao {
 
     private final LemmaRepository lemmaRepository;
 
-    public LemmaRepoServiceImpl(LemmaRepository lemmaRepository) {
+    public LemmaRepoImpl(LemmaRepository lemmaRepository) {
         this.lemmaRepository = lemmaRepository;
     }
 

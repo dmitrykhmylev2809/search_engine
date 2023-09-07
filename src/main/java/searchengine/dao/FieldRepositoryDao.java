@@ -4,7 +4,7 @@ import searchengine.models.Field;
 
 import java.util.List;
 
-public interface FieldRepositoryService {
+public interface FieldRepositoryDao {
     Field getFieldByName(String fieldName);
     void save(Field field);
     List<Field> getAllField();

@@ -4,7 +4,7 @@ import searchengine.models.Indexing;
 
 import java.util.List;
 
-public interface IndexRepositoryService {
+public interface IndexRepositoryDao {
     List<Indexing> getAllIndexingByLemmaId(int lemmaId);
     List<Indexing> getAllIndexingByPageId(int pageId);
     void deleteAllIndexing(List<Indexing> indexingList);

@@ -5,6 +5,6 @@ import searchengine.controllers.responses.ApiResponse;
 
 import java.io.IOException;
 
-public interface SearchService {
+public interface SearchDao {
     ApiResponse getResponse (MorphologyAnalyzerRequestDTO morphologyAnalyzerRequestDTO, String url, int offset, int limit) throws IOException;
 }

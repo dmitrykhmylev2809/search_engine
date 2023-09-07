@@ -12,33 +12,33 @@ import searchengine.url.SiteMapBuilder;
 import java.io.IOException;
 import java.util.*;
 
-public class SiteIndexing extends Thread{
+public class SiteIndexingDao extends Thread{
     private final Site site;
     private final SearchSettings searchSettings;
-    private final FieldRepositoryService fieldRepositoryService;
-    private final SiteRepositoryService siteRepositoryService;
-    private final IndexRepositoryService indexRepositoryService;
-    private final PageRepositoryService pageRepositoryService;
-    private final LemmaRepositoryService lemmaRepositoryService;
+    private final FieldRepositoryDao fieldRepositoryDao;
+    private final SiteRepositoryDao siteRepositoryDao;
+    private final IndexRepositoryDao indexRepositoryDao;
+    private final PageRepositoryDao pageRepositoryDao;
+    private final LemmaRepositoryDao lemmaRepositoryDao;
     private final boolean allSite;
 
     public volatile boolean  isStopped;
 
-    public SiteIndexing(Site site,
-                        SearchSettings searchSettings,
-                        FieldRepositoryService fieldRepositoryService,
-                        SiteRepositoryService siteRepositoryService,
-                        IndexRepositoryService indexRepositoryService,
-                        PageRepositoryService pageRepositoryService,
-                        LemmaRepositoryService lemmaRepositoryService,
-                        boolean allSite) {
+    public SiteIndexingDao(Site site,
+                           SearchSettings searchSettings,
+                           FieldRepositoryDao fieldRepositoryDao,
+                           SiteRepositoryDao siteRepositoryDao,
+                           IndexRepositoryDao indexRepositoryDao,
+                           PageRepositoryDao pageRepositoryDao,
+                           LemmaRepositoryDao lemmaRepositoryDao,
+                           boolean allSite) {
         this.site = site;
         this.searchSettings = searchSettings;
-        this.fieldRepositoryService = fieldRepositoryService;
-        this.siteRepositoryService = siteRepositoryService;
-        this.indexRepositoryService = indexRepositoryService;
-        this.pageRepositoryService = pageRepositoryService;
-        this.lemmaRepositoryService = lemmaRepositoryService;
+        this.fieldRepositoryDao = fieldRepositoryDao;
+        this.siteRepositoryDao = siteRepositoryDao;
+        this.indexRepositoryDao = indexRepositoryDao;
+        this.pageRepositoryDao = pageRepositoryDao;
+        this.lemmaRepositoryDao = lemmaRepositoryDao;
         this.allSite = allSite;
     }
 
@@ -61,7 +61,7 @@ public class SiteIndexing extends Thread{
     public void runAllIndexing() {
         site.setStatus(Status.INDEXING);
         site.setStatusTime(new Date());
-        siteRepositoryService.save(site);
+        siteRepositoryDao.save(site);
         SiteMapBuilder builder = new SiteMapBuilder(site.getUrl(), this.isInterrupted(), searchSettings);
         builder.builtSiteMap();
         List<String> allSiteUrls = builder.getSiteMap();
@@ -73,11 +73,11 @@ public class SiteIndexing extends Thread{
     public void runOneSiteIndexing(String searchUrl) {
         site.setStatus(Status.INDEXING);
         site.setStatusTime(new Date());
-        siteRepositoryService.save(site);
+        siteRepositoryDao.save(site);
         List<Field> fieldList = getFieldListFromDB();
         try {
              Page page = getSearchPage(searchUrl, site.getUrl(), site.getId());
-            Page checkPage = pageRepositoryService.getPage(searchUrl.replaceAll(site.getUrl(), ""));
+            Page checkPage = pageRepositoryDao.getPage(searchUrl.replaceAll(site.getUrl(), ""));
             if (checkPage != null){
                 prepareDbToIndexing(checkPage);
             }
@@ -108,18 +108,18 @@ public class SiteIndexing extends Thread{
             site.setStatus(Status.FAILED);
         }
         finally {
-            siteRepositoryService.save(site);
+            siteRepositoryDao.save(site);
         }
         if (!isStopped) {
         site.setStatus(Status.INDEXED); }
         else {
             site.setStatus(Status.FAILED);
         }
-        siteRepositoryService.save(site);
+        siteRepositoryDao.save(site);
     }
 
     private void pageToDb(Page page) {
-        pageRepositoryService.save(page);
+        pageRepositoryDao.save(page);
     }
 
     private Page getSearchPage(String url, String baseUrl, int siteId) throws IOException {
@@ -141,7 +141,7 @@ public class SiteIndexing extends Thread{
 
     private List<Field> getFieldListFromDB() {
         List<Field> list = new ArrayList<>();
-        Iterable<Field> iterable = fieldRepositoryService.getAllField();
+        Iterable<Field> iterable = fieldRepositoryDao.getAllField();
         iterable.forEach(list::add);
         return list;
     }
@@ -161,18 +161,18 @@ public class SiteIndexing extends Thread{
     private void lemmaToDB (TreeMap<String, Integer> lemmaMap, int siteId) {
         for (Map.Entry<String, Integer> lemma : lemmaMap.entrySet()) {
             String lemmaName = lemma.getKey();
-            List<Lemma> lemma1 = lemmaRepositoryService.getLemma(lemmaName);
+            List<Lemma> lemma1 = lemmaRepositoryDao.getLemma(lemmaName);
             Lemma lemma2 = lemma1.stream().
                     filter(lemma3 -> lemma3.getSiteId() == siteId).
                     findFirst().
                     orElse(null);
             if (lemma2 == null){
                 Lemma newLemma = new Lemma(lemmaName, 1, siteId);
-                lemmaRepositoryService.save(newLemma);
+                lemmaRepositoryDao.save(newLemma);
             } else {
                 int count = lemma2.getFrequency();
                 lemma2.setFrequency(++count);
-                lemmaRepositoryService.save(lemma2);
+                lemmaRepositoryDao.save(lemma2);
             }}
     }
 
@@ -192,26 +192,26 @@ public class SiteIndexing extends Thread{
     }
 
     private void indexingToDb (TreeMap<String, Float> map, String path){
-        Page page = pageRepositoryService.getPage(path);
+        Page page = pageRepositoryDao.getPage(path);
         int pathId = page.getId();
         int siteId = page.getSiteId();
         for (Map.Entry<String, Float> lemma : map.entrySet()) {
             String lemmaName = lemma.getKey();
-            List<Lemma> lemma1 = lemmaRepositoryService.getLemma(lemmaName);
+            List<Lemma> lemma1 = lemmaRepositoryDao.getLemma(lemmaName);
             for (Lemma l : lemma1) {
                 if (l.getSiteId() == siteId) {
                     int lemmaId = l.getId();
                     Indexing indexing = new Indexing(pathId, lemmaId, lemma.getValue());
-                    indexRepositoryService.save(indexing);
+                    indexRepositoryDao.save(indexing);
                 }
             }}
     }
 
     private void prepareDbToIndexing(Page page) {
-        List<Indexing> indexingList = indexRepositoryService.getAllIndexingByPageId(page.getId());
-        List<Lemma> allLemmasIdByPage = lemmaRepositoryService.findLemmasByIndexing(indexingList);
-        lemmaRepositoryService.deleteAllLemmas(allLemmasIdByPage);
-        indexRepositoryService.deleteAllIndexing(indexingList);
-        pageRepositoryService.deletePage(page);
+        List<Indexing> indexingList = indexRepositoryDao.getAllIndexingByPageId(page.getId());
+        List<Lemma> allLemmasIdByPage = lemmaRepositoryDao.findLemmasByIndexing(indexingList);
+        lemmaRepositoryDao.deleteAllLemmas(allLemmasIdByPage);
+        indexRepositoryDao.deleteAllIndexing(indexingList);
+        pageRepositoryDao.deletePage(page);
     }
 }

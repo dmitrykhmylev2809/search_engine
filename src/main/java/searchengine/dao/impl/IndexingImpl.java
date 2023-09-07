@@ -1,22 +1,22 @@
 package searchengine.dao.impl;
 
+import org.springframework.stereotype.Component;
 import searchengine.service.Indexer;
-import searchengine.dao.IndexingService;
+import searchengine.dao.IndexingDao;
 import searchengine.controllers.responses.FalseApiResponse;
 import searchengine.controllers.responses.ApiResponse;
 import searchengine.controllers.responses.TrueApiResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.stereotype.Service;
 
-@Service
-public class IndexingServiceImpl implements IndexingService {
+@Component
+public class IndexingImpl implements IndexingDao {
 
     private final Indexer indexer;
 
-    private static final Log log = LogFactory.getLog(IndexingServiceImpl.class);
+    private static final Log log = LogFactory.getLog(IndexingImpl.class);
 
-    public IndexingServiceImpl(Indexer indexer) {
+    public IndexingImpl(Indexer indexer) {
         this.indexer = indexer;
     }
 

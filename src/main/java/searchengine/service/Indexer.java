@@ -2,7 +2,7 @@ package searchengine.service;
 
 import org.springframework.stereotype.Service;
 import searchengine.dao.SearchSettings;
-import searchengine.dao.SiteIndexing;
+import searchengine.dao.SiteIndexingDao;
 import searchengine.dao.*;
 import searchengine.models.Field;
 import searchengine.models.Site;
@@ -26,26 +26,26 @@ public class Indexer {
 
     private final SearchSettings searchSettings;
 
-    private final FieldRepositoryService fieldRepositoryService;
-    private final SiteRepositoryService siteRepositoryService;
-    private final IndexRepositoryService indexRepositoryService;
-    private final PageRepositoryService pageRepositoryService;
-    private final LemmaRepositoryService lemmaRepositoryService;
+    private final FieldRepositoryDao fieldRepositoryDao;
+    private final SiteRepositoryDao siteRepositoryDao;
+    private final IndexRepositoryDao indexRepositoryDao;
+    private final PageRepositoryDao pageRepositoryDao;
+    private final LemmaRepositoryDao lemmaRepositoryDao;
 
     List<Future<?>> futures = new ArrayList<>();
 
     public Indexer(SearchSettings searchSettings,
-                   FieldRepositoryService fieldRepositoryService,
-                   SiteRepositoryService siteRepositoryService,
-                   IndexRepositoryService indexRepositoryService,
-                   PageRepositoryService pageRepositoryService,
-                   LemmaRepositoryService lemmaRepositoryService) {
+                   FieldRepositoryDao fieldRepositoryDao,
+                   SiteRepositoryDao siteRepositoryDao,
+                   IndexRepositoryDao indexRepositoryDao,
+                   PageRepositoryDao pageRepositoryDao,
+                   LemmaRepositoryDao lemmaRepositoryDao) {
         this.searchSettings = searchSettings;
-        this.fieldRepositoryService = fieldRepositoryService;
-        this.siteRepositoryService = siteRepositoryService;
-        this.indexRepositoryService = indexRepositoryService;
-        this.pageRepositoryService = pageRepositoryService;
-        this.lemmaRepositoryService = lemmaRepositoryService;
+        this.fieldRepositoryDao = fieldRepositoryDao;
+        this.siteRepositoryDao = siteRepositoryDao;
+        this.indexRepositoryDao = indexRepositoryDao;
+        this.pageRepositoryDao = pageRepositoryDao;
+        this.lemmaRepositoryDao = lemmaRepositoryDao;
     }
 
 
@@ -67,7 +67,7 @@ public class Indexer {
     }
 
     public String checkedSiteIndexing(String url) throws InterruptedException {
-        List<Site> siteList = siteRepositoryService.getAllSites();
+        List<Site> siteList = siteRepositoryDao.getAllSites();
         String baseUrl = "";
         for(Site site : siteList) {
             if(site.getStatus() != Status.INDEXED) {
@@ -80,21 +80,21 @@ public class Indexer {
         if(baseUrl.isEmpty()){
             return "not found";
         } else {
-            Site site = siteRepositoryService.getSite(baseUrl);
+            Site site = siteRepositoryDao.getSite(baseUrl);
             site.setUrl(url);
-            SiteIndexing indexing = new SiteIndexing(
+            SiteIndexingDao indexing = new SiteIndexingDao(
                     site,
                     searchSettings,
-                    fieldRepositoryService,
-                    siteRepositoryService,
-                    indexRepositoryService,
-                    pageRepositoryService,
-                    lemmaRepositoryService,
+                    fieldRepositoryDao,
+                    siteRepositoryDao,
+                    indexRepositoryDao,
+                    pageRepositoryDao,
+                    lemmaRepositoryDao,
                     false);
             Future<?> future = executor.submit(indexing);
             futures.add(future);
             site.setUrl(baseUrl);
-            siteRepositoryService.save(site);
+            siteRepositoryDao.save(site);
             return "true";
         }
     }
@@ -103,38 +103,38 @@ public class Indexer {
     private void fieldInit() {
         Field fieldTitle = new Field("title", "title", 1.0f);
         Field fieldBody = new Field("body", "body", 0.8f);
-        if (fieldRepositoryService.getFieldByName("title") == null) {
-            fieldRepositoryService.save(fieldTitle);
-            fieldRepositoryService.save(fieldBody);
+        if (fieldRepositoryDao.getFieldByName("title") == null) {
+            fieldRepositoryDao.save(fieldTitle);
+            fieldRepositoryDao.save(fieldBody);
         }
     }
 
     private boolean startSiteIndexing(Site site) throws InterruptedException {
-        Site site1 = siteRepositoryService.getSite(site.getUrl());
+        Site site1 = siteRepositoryDao.getSite(site.getUrl());
         if (site1 == null) {
-            siteRepositoryService.save(site);
-            SiteIndexing indexing = new SiteIndexing(
-                    siteRepositoryService.getSite(site.getUrl()),
+            siteRepositoryDao.save(site);
+            SiteIndexingDao indexing = new SiteIndexingDao(
+                    siteRepositoryDao.getSite(site.getUrl()),
                     searchSettings,
-                    fieldRepositoryService,
-                    siteRepositoryService,
-                    indexRepositoryService,
-                    pageRepositoryService,
-                    lemmaRepositoryService,
+                    fieldRepositoryDao,
+                    siteRepositoryDao,
+                    indexRepositoryDao,
+                    pageRepositoryDao,
+                    lemmaRepositoryDao,
                     true);
             Future<?> future = executor.submit(indexing);
             futures.add(future);
             return true;
         } else {
             if (!site1.getStatus().equals(Status.INDEXING)){
-                SiteIndexing indexing = new SiteIndexing(
-                        siteRepositoryService.getSite(site.getUrl()),
+                SiteIndexingDao indexing = new SiteIndexingDao(
+                        siteRepositoryDao.getSite(site.getUrl()),
                         searchSettings,
-                        fieldRepositoryService,
-                        siteRepositoryService,
-                        indexRepositoryService,
-                        pageRepositoryService,
-                        lemmaRepositoryService,
+                        fieldRepositoryDao,
+                        siteRepositoryDao,
+                        indexRepositoryDao,
+                        pageRepositoryDao,
+                        lemmaRepositoryDao,
                         true);
                 Future<?> future = executor.submit(indexing);
                 futures.add(future);
@@ -163,10 +163,10 @@ public class Indexer {
             log.error("Ошибка закрытия потоков: " + e);
         }
         if (!isThreadAlive){
-            List<Site> siteList = siteRepositoryService.getAllSites();
+            List<Site> siteList = siteRepositoryDao.getAllSites();
             for(Site site : siteList) {
                 site.setStatus(Status.FAILED);
-                siteRepositoryService.save(site);
+                siteRepositoryDao.save(site);
             }
         }
         return !isThreadAlive;

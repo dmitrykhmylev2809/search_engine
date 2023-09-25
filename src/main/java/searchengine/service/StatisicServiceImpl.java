@@ -2,10 +2,6 @@ package searchengine.service;
 
 import searchengine.models.Site;
 import searchengine.models.Status;
-import searchengine.dao.LemmaRepositoryDao;
-import searchengine.dao.PageRepositoryDao;
-import searchengine.dao.SiteRepositoryDao;
-import searchengine.dao.StatisticDao;
 import searchengine.dto.statisticDTO.StatisticsDetailedDTO;
 import searchengine.dto.statisticDTO.StatisticsDTO;
 import searchengine.dto.statisticDTO.StatisticsTotalDTO;
@@ -13,29 +9,32 @@ import searchengine.controllers.responses.StatisticApiResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;
+import searchengine.repo.LemmaRepository;
+import searchengine.repo.PageRepository;
+import searchengine.repo.SiteRepository;
 
 import java.util.List;
 
 @Service
-public class Statistic implements StatisticDao {
+public class StatisicServiceImpl implements StatisticService {
 
-    private static final Log log = LogFactory.getLog(Statistic.class);
+    private static final Log log = LogFactory.getLog(StatisicServiceImpl.class);
 
-    private final SiteRepositoryDao siteRepositoryDao;
-    private final LemmaRepositoryDao lemmaRepositoryDao;
-    private final PageRepositoryDao pageRepositoryDao;
+    private final SiteRepository siteRepository;
+    private final LemmaRepository lemmaRepository;
+    private final PageRepository pageRepository;
 
-    public Statistic(SiteRepositoryDao siteRepositoryDao,
-                     LemmaRepositoryDao lemmaRepositoryDao,
-                     PageRepositoryDao pageRepositoryDao) {
-        this.siteRepositoryDao = siteRepositoryDao;
-        this.lemmaRepositoryDao = lemmaRepositoryDao;
-        this.pageRepositoryDao = pageRepositoryDao;
+    public StatisicServiceImpl(SiteRepository siteRepository,
+                               LemmaRepository lemmaRepository,
+                               PageRepository pageRepository) {
+        this.siteRepository = siteRepository;
+        this.lemmaRepository = lemmaRepository;
+        this.pageRepository = pageRepository;
     }
 
     public StatisticApiResponse getStatistic(){
         StatisticsTotalDTO statisticsTotalDTO = getTotal();
-        List<Site> siteList = siteRepositoryDao.getAllSites();
+        List<Site> siteList = siteRepository.findAll();
         StatisticsDetailedDTO[] statisticsDetailedDTOS = new StatisticsDetailedDTO[siteList.size()];
         for (int i = 0; i < siteList.size(); i++) {
             statisticsDetailedDTOS[i] = getDetailed(siteList.get(i));
@@ -45,9 +44,9 @@ public class Statistic implements StatisticDao {
     }
 
     private StatisticsTotalDTO getTotal(){
-        long sites = siteRepositoryDao.siteCount();
-        long lemmas = lemmaRepositoryDao.lemmaCount();
-        long pages = pageRepositoryDao.pageCount();
+        long sites = siteRepository.count();
+        long lemmas = lemmaRepository.count();
+        long pages = pageRepository.count();
         boolean isIndexing = isSitesIndexing();
         return new StatisticsTotalDTO(sites, pages, lemmas, isIndexing);
 
@@ -59,14 +58,14 @@ public class Statistic implements StatisticDao {
         Status status = site.getStatus();
         long statusTime = site.getStatusTime().getTime();
         String error = site.getLastError();
-        long pages = pageRepositoryDao.pageCount(site.getId());
-        long lemmas = lemmaRepositoryDao.lemmaCount(site.getId());
+        long pages = pageRepository.countBySiteId(site.getId());
+        long lemmas = lemmaRepository.countBySiteId(site.getId());
         return new StatisticsDetailedDTO(url, name, status, statusTime, error, pages, lemmas);
     }
 
     private boolean isSitesIndexing(){
         boolean is = true;
-        for(Site s : siteRepositoryDao.getAllSites()){
+        for(Site s : siteRepository.findAll()){
             if(!s.getStatus().equals(Status.INDEXED)){
                 is = false;
                 break;

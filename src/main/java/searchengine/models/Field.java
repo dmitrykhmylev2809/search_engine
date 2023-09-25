@@ -38,14 +38,6 @@ public class Field {
         this.name = name;
     }
 
-    public String getSelector() {
-        return selector;
-    }
-
-    public void setSelector(String selector) {
-        this.selector = selector;
-    }
-
     public float getWeight() {
         return weight;
     }
@@ -53,4 +45,5 @@ public class Field {
     public void setWeight(float weight) {
         this.weight = weight;
     }
+
 }

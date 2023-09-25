@@ -9,20 +9,20 @@ import org.springframework.http.ResponseEntity;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import searchengine.dao.IndexingDao;
+import searchengine.service.IndexingService;
 import searchengine.controllers.responses.ApiResponse;
 
 class IndexingControllerTest {
 
     @Mock
-    private IndexingDao indexingDao;
+    private IndexingService indexingService;
 
     private IndexingController indexingController;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        indexingController = new IndexingController(indexingDao);
+        indexingController = new IndexingController(indexingService);
     }
 
     @Test
@@ -34,7 +34,7 @@ class IndexingControllerTest {
                 return true;
             }
         };
-        when(indexingDao.startIndexing()).thenReturn(expectedApiResponse);
+        when(indexingService.startIndexing()).thenReturn(expectedApiResponse);
         ResponseEntity<Object> response = indexingController.startIndexing();
         assertTrue(expectedApiResponse.getResult());
     }
@@ -48,7 +48,7 @@ class IndexingControllerTest {
                 return true;
             }
         };
-        when(indexingDao.stopIndexing()).thenReturn(expectedApiResponse);
+        when(indexingService.stopIndexing()).thenReturn(expectedApiResponse);
         ResponseEntity<Object> response = indexingController.stopIndexing();
         assertTrue(expectedApiResponse.getResult());
     }
@@ -62,7 +62,7 @@ class IndexingControllerTest {
                 return true;
             }
         };
-        when(indexingDao.pageIndexing(testUrl)).thenReturn(expectedApiResponse);
+        when(indexingService.pageIndexing(testUrl)).thenReturn(expectedApiResponse);
         ResponseEntity<Object> response = indexingController.pageIndexing(testUrl);
         assertTrue(expectedApiResponse.getResult());
     }

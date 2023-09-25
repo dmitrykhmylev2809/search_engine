@@ -1,7 +1,7 @@
-package searchengine.dao;
+package searchengine.service;
 
 import searchengine.controllers.responses.StatisticApiResponse;
 
-public interface StatisticDao {
+public interface StatisticService {
     StatisticApiResponse getStatistic();
 }

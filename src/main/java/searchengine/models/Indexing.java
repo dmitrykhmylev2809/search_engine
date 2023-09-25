@@ -27,24 +27,12 @@ public class Indexing {
         return pageId;
     }
 
-    public void setPageId(int pageId) {
-        this.pageId = pageId;
-    }
-
     public int getLemmaId() {
         return lemmaId;
     }
 
-    public void setLemmaId(int lemmaId) {
-        this.lemmaId = lemmaId;
-    }
-
     public float getRank() {
         return ranking;
-    }
-
-    public void setRank(float rank) {
-        this.ranking = rank;
     }
 
     @Override

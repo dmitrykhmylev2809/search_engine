@@ -1,6 +1,6 @@
 package searchengine.controllers;
 
-import searchengine.dao.StatisticDao;
+import searchengine.service.StatisticService;
 import searchengine.controllers.responses.StatisticApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -9,15 +9,15 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class StatisticController {
 
-    private final StatisticDao statisticDao;
+    private final StatisticService statisticService;
 
-    public StatisticController(StatisticDao statisticDao) {
-        this.statisticDao = statisticDao;
+    public StatisticController(StatisticService statisticService) {
+        this.statisticService = statisticService;
     }
 
     @GetMapping("/api/statistics")
     public ResponseEntity<Object> getStatistics(){
-        StatisticApiResponse apiResponse = statisticDao.getStatistic();
+        StatisticApiResponse apiResponse = statisticService.getStatistic();
         return ResponseEntity.ok (apiResponse);
     }
 }

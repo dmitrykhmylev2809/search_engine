@@ -32,14 +32,6 @@ public class Lemma {
         this.id = id;
     }
 
-    public String getLemma() {
-        return lemma;
-    }
-
-    public void setLemma(String lemma) {
-        this.lemma = lemma;
-    }
-
     public int getFrequency() {
         return frequency;
     }
@@ -50,10 +42,6 @@ public class Lemma {
 
     public int getSiteId() {
         return siteId;
-    }
-
-    public void setSiteId(int siteId) {
-        this.siteId = siteId;
     }
 
     @Override

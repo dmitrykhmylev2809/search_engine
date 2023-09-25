@@ -1,10 +1,10 @@
-package searchengine.dao;
+package searchengine.service;
 
 import searchengine.dto.MorphologyAnalyzerRequestDTO;
 import searchengine.controllers.responses.ApiResponse;
 
 import java.io.IOException;
 
-public interface SearchDao {
+public interface SearchService {
     ApiResponse getResponse (MorphologyAnalyzerRequestDTO morphologyAnalyzerRequestDTO, String url, int offset, int limit) throws IOException;
 }

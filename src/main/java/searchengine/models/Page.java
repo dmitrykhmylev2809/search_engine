@@ -1,7 +1,5 @@
 package searchengine.models;
 
-import org.hibernate.annotations.Type;
-
 import javax.persistence.*;
 
 @Entity
@@ -34,10 +32,6 @@ public class Page {
 
     public void setPath(String path) {
         this.path = path;
-    }
-
-    public int getCode() {
-        return code;
     }
 
     public void setCode(int code) {

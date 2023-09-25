@@ -1,8 +1,8 @@
-package searchengine.dao;
+package searchengine.service;
 
 import searchengine.controllers.responses.ApiResponse;
 
-public interface IndexingDao {
+public interface IndexingService {
     ApiResponse startIndexing();
     ApiResponse stopIndexing();
     ApiResponse pageIndexing(String url);

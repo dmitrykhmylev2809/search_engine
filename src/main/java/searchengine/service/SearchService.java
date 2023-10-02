@@ -6,5 +6,5 @@ import searchengine.controllers.responses.ApiResponse;
 import java.io.IOException;
 
 public interface SearchService {
-    ApiResponse getResponse (MorphologyAnalyzerRequestDTO morphologyAnalyzerRequestDTO, String url, int offset, int limit) throws IOException;
+    ApiResponse getResponse(MorphologyAnalyzerRequestDTO query, String site, int offset, int limit) throws IOException;
 }

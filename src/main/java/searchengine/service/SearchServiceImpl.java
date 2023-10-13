@@ -5,7 +5,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 import searchengine.controllers.responses.SearchApiResponse;
-import searchengine.dto.MorphologyAnalyzerRequestDTO;
+import searchengine.morphology.QueryToLemmaList;
 import searchengine.controllers.responses.FalseApiResponse;
 import searchengine.controllers.responses.ApiResponse;
 import org.apache.commons.logging.Log;
@@ -46,21 +46,21 @@ public class SearchServiceImpl implements SearchService {
     }
 
     @Override
-    public ApiResponse getResponse(MorphologyAnalyzerRequestDTO morphologyAnalyzerRequestDTO, String url, int offset, int limit) throws IOException {
-        log.info("Запрос на поиск строки- \"" + morphologyAnalyzerRequestDTO.getReq() + "\"");
-        if (morphologyAnalyzerRequestDTO.getReq().equals("")) {
+    public ApiResponse getResponse(QueryToLemmaList queryToLemmaList, String url, int offset, int limit) throws IOException {
+        log.info("Запрос на поиск строки- \"" + queryToLemmaList.getReq() + "\"");
+        if (queryToLemmaList.getReq().equals("")) {
             ApiResponse response = new FalseApiResponse("Задан пустой поисковый запрос");
             log.warn("Задан пустой поисковый запрос");
             return response;
         }
         if (url.equals("")) {
-            return searchService(morphologyAnalyzerRequestDTO, null, offset, limit);
+            return searchService(queryToLemmaList, null, offset, limit);
         } else {
-            return searchService(morphologyAnalyzerRequestDTO, url, offset, limit);
+            return searchService(queryToLemmaList, url, offset, limit);
         }
     }
 
-    private ApiResponse searchService(MorphologyAnalyzerRequestDTO query, String url, int offset, int limit) {
+    private ApiResponse searchService(QueryToLemmaList query, String url, int offset, int limit) {
         List<Site> siteList = siteRepository.findAll();
         List<SearchDataDTO> listOfSearchData = new ArrayList<>();
         if (url == null) {
@@ -92,9 +92,9 @@ public class SearchServiceImpl implements SearchService {
         return new SearchApiResponse(true, count, searchData);
     }
 
-    private Map<Page, Double> searching(MorphologyAnalyzerRequestDTO morphologyAnalyzerRequestDTO, int siteId) {
+    private Map<Page, Double> searching(QueryToLemmaList queryToLemmaList, int siteId) {
         HashMap<Page, Double> pageRelevance = new HashMap<>();
-        List<Lemma> reqLemmas = sortedReqLemmas(morphologyAnalyzerRequestDTO, siteId);
+        List<Lemma> reqLemmas = sortedReqLemmas(queryToLemmaList, siteId);
         List<Integer> pageIndexes = new ArrayList<>();
         if (!reqLemmas.isEmpty()) {
             List<Indexing> indexingList = indexRepository.getAllIndexingByLemmaId(reqLemmas.get(0).getId());
@@ -129,19 +129,19 @@ public class SearchServiceImpl implements SearchService {
         return pageRelevance;
     }
 
-    private List<SearchDataDTO> getSortedSearchData(Map<Page, Double> sortedPageMap, MorphologyAnalyzerRequestDTO morphologyAnalyzerRequestDTO) {
+    private List<SearchDataDTO> getSortedSearchData(Map<Page, Double> sortedPageMap, QueryToLemmaList queryToLemmaList) {
         List<SearchDataDTO> responses = new ArrayList<>();
         LinkedHashMap<Page, Double> sortedByRankPages = (LinkedHashMap<Page, Double>) sortMapByValue(sortedPageMap);
         for (Map.Entry<Page, Double> page : sortedByRankPages.entrySet()) {
-            SearchDataDTO response = getResponseByPage(page.getKey(), morphologyAnalyzerRequestDTO, page.getValue());
+            SearchDataDTO response = getResponseByPage(page.getKey(), queryToLemmaList, page.getValue());
             responses.add(response);
         }
         return responses;
     }
 
-    private List<Lemma> sortedReqLemmas(MorphologyAnalyzerRequestDTO morphologyAnalyzerRequestDTO, int siteId) {
+    private List<Lemma> sortedReqLemmas(QueryToLemmaList queryToLemmaList, int siteId) {
         List<Lemma> lemmaList = new ArrayList<>();
-        List<String> list = morphologyAnalyzerRequestDTO.getReqLemmas();
+        List<String> list = queryToLemmaList.getReqLemmas();
         for (String s : list) {
             List<Lemma> reqLemmas = lemmaRepository.findByLemma(s);
             for (Lemma l : reqLemmas) {
@@ -166,14 +166,14 @@ public class SearchServiceImpl implements SearchService {
     }
 
 
-    private SearchDataDTO getResponseByPage(Page page, MorphologyAnalyzerRequestDTO morphologyAnalyzerRequestDTO, double relevance) {
+    private SearchDataDTO getResponseByPage(Page page, QueryToLemmaList queryToLemmaList, double relevance) {
         SearchDataDTO response = new SearchDataDTO();
         Site site = siteRepository.findById(page.getSiteId());
         String siteUrl = site.getUrl();
         String siteName = site.getName();
         String uri = page.getPath();
         String title = getTitle(page.getContent());
-        String snippet = getSnippet(page.getContent(), morphologyAnalyzerRequestDTO);
+        String snippet = getSnippet(page.getContent(), queryToLemmaList);
         response.setSite(siteUrl);
         response.setSiteName(siteName);
         response.setRelevance(relevance);
@@ -195,7 +195,7 @@ public class SearchServiceImpl implements SearchService {
         return string;
     }
 
-    private String getSnippet(String html, MorphologyAnalyzerRequestDTO morphologyAnalyzerRequestDTO) {
+    private String getSnippet(String html, QueryToLemmaList queryToLemmaList) {
         MorphologyAnalyzer analyzer = new MorphologyAnalyzer();
         String string = "";
         Document document = Jsoup.parse(html);
@@ -207,7 +207,7 @@ public class SearchServiceImpl implements SearchService {
         if (!builder.isEmpty()) {
             string = builder.toString();
         }
-        List<String> req = morphologyAnalyzerRequestDTO.getReqLemmas();
+        List<String> req = queryToLemmaList.getReqLemmas();
         Map<String, Integer> integerList1 = new HashMap<>();
 
         for (String s : req) {

@@ -1,11 +1,11 @@
-package searchengine.dto;
+package searchengine.morphology;
 
 import searchengine.morphology.MorphologyAnalyzer;
 
 import java.util.*;
 
 
-public class MorphologyAnalyzerRequestDTO {
+public class QueryToLemmaList {
 
     private String req;
     private List<String> reqLemmas;
@@ -18,7 +18,7 @@ public class MorphologyAnalyzerRequestDTO {
         return req;
     }
 
-    public MorphologyAnalyzerRequestDTO(String req){
+    public QueryToLemmaList(String req){
         this.req = req;
         reqLemmas = new ArrayList<>();
         try {

@@ -152,44 +152,6 @@ public class SearchServiceImpl implements SearchService {
         }
     }
 
-
-
-//    private Map<Page, Double> searching(QueryToLemmaList queryToLemmaList, int siteId) {
-//        HashMap<Page, Double> pageRelevance = new HashMap<>();
-//        List<Lemma> reqLemmas = sortedReqLemmas(queryToLemmaList, siteId);
-//        List<Integer> pageIndexes = new ArrayList<>();
-//        if (!reqLemmas.isEmpty()) {
-//            List<Indexing> indexingList = indexRepository.getAllIndexingByLemmaId(reqLemmas.get(0).getId());
-//            indexingList.forEach(indexing -> pageIndexes.add(indexing.getPageId()));
-//            for (Lemma lemma : reqLemmas) {
-//                if (!pageIndexes.isEmpty() && lemma.getId() != reqLemmas.get(0).getId()) {
-//                    List<Indexing> indexingList2 = indexRepository.getAllIndexingByLemmaId(lemma.getId());
-//                    List<Integer> tempList = new ArrayList<>();
-//                    indexingList2.forEach(indexing -> tempList.add(indexing.getPageId()));
-//                    pageIndexes.retainAll(tempList);
-//                }
-//            }
-//            Map<Page, Double> pageAbsRelevance = new HashMap<>();
-//
-//            double maxRel = 0.0;
-//            for (Integer p : pageIndexes) {
-//                Optional<Page> opPage;
-//                opPage = pageRepository.findByIdAndSiteId(p, siteId);
-//                if (opPage.isPresent()) {
-//                    Page page = opPage.get();
-//                    double r = getAbsRelevance(page, reqLemmas);
-//                    pageAbsRelevance.put(page, r);
-//                    if (r > maxRel)
-//                        maxRel = r;
-//                }
-//            }
-//            for (Map.Entry<Page, Double> abs : pageAbsRelevance.entrySet()) {
-//                pageRelevance.put(abs.getKey(), abs.getValue() / maxRel);
-//            }
-//        }
-//        return pageRelevance;
-//    }
-
     private List<SearchDataDTO> getSortedSearchData(Map<Page, Double> sortedPageMap, QueryToLemmaList queryToLemmaList) {
         List<SearchDataDTO> responses = new ArrayList<>();
         LinkedHashMap<Page, Double> sortedByRankPages = (LinkedHashMap<Page, Double>) sortMapByValue(sortedPageMap);

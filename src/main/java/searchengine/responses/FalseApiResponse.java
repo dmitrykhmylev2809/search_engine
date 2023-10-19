@@ -1,4 +1,4 @@
-package searchengine.controllers.responses;
+package searchengine.responses;
 
 public class FalseApiResponse implements ApiResponse {
     private final String error;

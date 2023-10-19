@@ -1,4 +1,4 @@
-package searchengine.controllers.responses;
+package searchengine.responses;
 
 
 import searchengine.dto.statisticDTO.StatisticsDTO;

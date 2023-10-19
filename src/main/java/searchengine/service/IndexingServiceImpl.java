@@ -2,9 +2,9 @@ package searchengine.service;
 
 import org.springframework.stereotype.Service;
 import searchengine.config.SearchSettings;
-import searchengine.controllers.responses.FalseApiResponse;
-import searchengine.controllers.responses.ApiResponse;
-import searchengine.controllers.responses.TrueApiResponse;
+import searchengine.responses.FalseApiResponse;
+import searchengine.responses.ApiResponse;
+import searchengine.responses.TrueApiResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import searchengine.models.Field;

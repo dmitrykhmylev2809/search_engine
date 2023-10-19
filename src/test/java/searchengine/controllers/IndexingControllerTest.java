@@ -10,7 +10,7 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import searchengine.service.IndexingService;
-import searchengine.controllers.responses.ApiResponse;
+import searchengine.responses.ApiResponse;
 
 class IndexingControllerTest {
 

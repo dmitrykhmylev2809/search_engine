@@ -1,7 +1,7 @@
 package searchengine.service;
 
 import searchengine.morphology.QueryToLemmaList;
-import searchengine.controllers.responses.ApiResponse;
+import searchengine.responses.ApiResponse;
 
 import java.io.IOException;
 

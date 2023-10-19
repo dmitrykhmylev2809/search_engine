@@ -1,6 +1,6 @@
 package searchengine.service;
 
-import searchengine.controllers.responses.StatisticApiResponse;
+import searchengine.responses.StatisticApiResponse;
 
 public interface StatisticService {
     StatisticApiResponse getStatistic();

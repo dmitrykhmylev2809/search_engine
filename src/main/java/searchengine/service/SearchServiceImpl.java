@@ -4,10 +4,10 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
-import searchengine.controllers.responses.SearchApiResponse;
+import searchengine.responses.SearchApiResponse;
 import searchengine.morphology.QueryToLemmaList;
-import searchengine.controllers.responses.FalseApiResponse;
-import searchengine.controllers.responses.ApiResponse;
+import searchengine.responses.FalseApiResponse;
+import searchengine.responses.ApiResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import searchengine.dto.SearchDataDTO;
@@ -88,7 +88,6 @@ public class SearchServiceImpl implements SearchService {
         for (int i = offset; i < count; i++) {
             searchData[i] = listOfSearchData.get(i);
         }
-
         return new SearchApiResponse(true, count, searchData);
     }
 
@@ -96,38 +95,100 @@ public class SearchServiceImpl implements SearchService {
         HashMap<Page, Double> pageRelevance = new HashMap<>();
         List<Lemma> reqLemmas = sortedReqLemmas(queryToLemmaList, siteId);
         List<Integer> pageIndexes = new ArrayList<>();
+
         if (!reqLemmas.isEmpty()) {
-            List<Indexing> indexingList = indexRepository.getAllIndexingByLemmaId(reqLemmas.get(0).getId());
-            indexingList.forEach(indexing -> pageIndexes.add(indexing.getPageId()));
-            for (Lemma lemma : reqLemmas) {
-                if (!pageIndexes.isEmpty() && lemma.getId() != reqLemmas.get(0).getId()) {
-                    List<Indexing> indexingList2 = indexRepository.getAllIndexingByLemmaId(lemma.getId());
-                    List<Integer> tempList = new ArrayList<>();
-                    indexingList2.forEach(indexing -> tempList.add(indexing.getPageId()));
-                    pageIndexes.retainAll(tempList);
-                }
-            }
-            Map<Page, Double> pageAbsRelevance = new HashMap<>();
+            pageIndexes = getPageIndexes(reqLemmas);
+            Map<Page, Double> pageAbsRelevance = calculatePageAbsRelevance(pageIndexes, reqLemmas, siteId);
 
             double maxRel = 0.0;
-            for (Integer p : pageIndexes) {
-                Optional<Page> opPage;
-                opPage = pageRepository.findByIdAndSiteId(p, siteId);
-                if (opPage.isPresent()) {
-                    Page page = opPage.get();
-                    double r = getAbsRelevance(page, reqLemmas);
-                    pageAbsRelevance.put(page, r);
-                    if (r > maxRel)
-                        maxRel = r;
-                }
+            for (Double rel : pageAbsRelevance.values()) {
+                maxRel = Math.max(maxRel, rel);
             }
-            for (Map.Entry<Page, Double> abs : pageAbsRelevance.entrySet()) {
-                pageRelevance.put(abs.getKey(), abs.getValue() / maxRel);
-            }
+
+            normalizePageRelevance(pageAbsRelevance, pageRelevance, maxRel);
         }
 
         return pageRelevance;
     }
+
+    private List<Integer> getPageIndexes(List<Lemma> reqLemmas) {
+        List<Integer> pageIndexes = new ArrayList<>();
+        List<Indexing> indexingList = indexRepository.getAllIndexingByLemmaId(reqLemmas.get(0).getId());
+
+        indexingList.forEach(indexing -> pageIndexes.add(indexing.getPageId()));
+
+        for (Lemma lemma : reqLemmas) {
+            if (!pageIndexes.isEmpty() && lemma.getId() != reqLemmas.get(0).getId()) {
+                List<Indexing> indexingList2 = indexRepository.getAllIndexingByLemmaId(lemma.getId());
+                List<Integer> tempList = new ArrayList<>();
+                indexingList2.forEach(indexing -> tempList.add(indexing.getPageId()));
+                pageIndexes.retainAll(tempList);
+            }
+        }
+        return pageIndexes;
+    }
+
+    private Map<Page, Double> calculatePageAbsRelevance(List<Integer> pageIndexes, List<Lemma> reqLemmas, int siteId) {
+        Map<Page, Double> pageAbsRelevance = new HashMap<>();
+        double maxRel = 0.0;
+
+        for (Integer p : pageIndexes) {
+            Optional<Page> opPage = pageRepository.findByIdAndSiteId(p, siteId);
+
+            if (opPage.isPresent()) {
+                Page page = opPage.get();
+                double r = getAbsRelevance(page, reqLemmas);
+                pageAbsRelevance.put(page, r);
+                maxRel = Math.max(maxRel, r);
+            }
+        }
+
+        return pageAbsRelevance;
+    }
+
+    private void normalizePageRelevance(Map<Page, Double> pageAbsRelevance, Map<Page, Double> pageRelevance, double maxRel) {
+        for (Map.Entry<Page, Double> abs : pageAbsRelevance.entrySet()) {
+            pageRelevance.put(abs.getKey(), abs.getValue() / maxRel);
+        }
+    }
+
+
+
+//    private Map<Page, Double> searching(QueryToLemmaList queryToLemmaList, int siteId) {
+//        HashMap<Page, Double> pageRelevance = new HashMap<>();
+//        List<Lemma> reqLemmas = sortedReqLemmas(queryToLemmaList, siteId);
+//        List<Integer> pageIndexes = new ArrayList<>();
+//        if (!reqLemmas.isEmpty()) {
+//            List<Indexing> indexingList = indexRepository.getAllIndexingByLemmaId(reqLemmas.get(0).getId());
+//            indexingList.forEach(indexing -> pageIndexes.add(indexing.getPageId()));
+//            for (Lemma lemma : reqLemmas) {
+//                if (!pageIndexes.isEmpty() && lemma.getId() != reqLemmas.get(0).getId()) {
+//                    List<Indexing> indexingList2 = indexRepository.getAllIndexingByLemmaId(lemma.getId());
+//                    List<Integer> tempList = new ArrayList<>();
+//                    indexingList2.forEach(indexing -> tempList.add(indexing.getPageId()));
+//                    pageIndexes.retainAll(tempList);
+//                }
+//            }
+//            Map<Page, Double> pageAbsRelevance = new HashMap<>();
+//
+//            double maxRel = 0.0;
+//            for (Integer p : pageIndexes) {
+//                Optional<Page> opPage;
+//                opPage = pageRepository.findByIdAndSiteId(p, siteId);
+//                if (opPage.isPresent()) {
+//                    Page page = opPage.get();
+//                    double r = getAbsRelevance(page, reqLemmas);
+//                    pageAbsRelevance.put(page, r);
+//                    if (r > maxRel)
+//                        maxRel = r;
+//                }
+//            }
+//            for (Map.Entry<Page, Double> abs : pageAbsRelevance.entrySet()) {
+//                pageRelevance.put(abs.getKey(), abs.getValue() / maxRel);
+//            }
+//        }
+//        return pageRelevance;
+//    }
 
     private List<SearchDataDTO> getSortedSearchData(Map<Page, Double> sortedPageMap, QueryToLemmaList queryToLemmaList) {
         List<SearchDataDTO> responses = new ArrayList<>();
@@ -197,71 +258,92 @@ public class SearchServiceImpl implements SearchService {
 
     private String getSnippet(String html, QueryToLemmaList queryToLemmaList) {
         MorphologyAnalyzer analyzer = new MorphologyAnalyzer();
-        String string = "";
+        String string = extractTextFromHtml(html);
+        List<String> req = queryToLemmaList.getReqLemmas();
+        Map<String, Integer> lemmaIndexes = calculateLemmaIndexes(string, req, analyzer);
+        LinkedHashMap<String, Integer> sortedLemmaIndexes = sortLinkedMapByValue(lemmaIndexes);
+        return constructSnippet(string, sortedLemmaIndexes);
+    }
+
+    private String extractTextFromHtml(String html) {
         Document document = Jsoup.parse(html);
         Elements titleElements = document.select("title");
         Elements bodyElements = document.select("body");
         StringBuilder builder = new StringBuilder();
+
         titleElements.forEach(element -> builder.append(element.text()).append(" ").append("\n"));
         bodyElements.forEach(element -> builder.append(element.text()).append(" "));
-        if (!builder.isEmpty()) {
-            string = builder.toString();
+
+         if (!builder.isEmpty()) {
+            return builder.toString();
+        } else {
+            return "";
         }
-        List<String> req = queryToLemmaList.getReqLemmas();
-        Map<String, Integer> integerList1 = new HashMap<>();
+    }
+
+    private Map<String, Integer> calculateLemmaIndexes(String text, List<String> req, MorphologyAnalyzer analyzer) {
+        Map<String, Integer> lemmaIndexes = new HashMap<>();
 
         for (String s : req) {
-            integerList1.put(s, analyzer.findLemmaIndexInText(string, s).get(0));
+            lemmaIndexes.put(s, analyzer.findLemmaIndexInText(text, s).get(0));
         }
-        LinkedHashMap<String, Integer> sortedLinkedLemmasIndexes = sortLinkedMapByValue(integerList1);
 
-        StringBuilder builder1 = new StringBuilder();
+        return lemmaIndexes;
+    }
 
-        Iterator<Map.Entry<String, Integer>> iterator = sortedLinkedLemmasIndexes.entrySet().iterator();
+    private String constructSnippet(String text, LinkedHashMap<String, Integer> sortedLemmaIndexes) {
+        StringBuilder builder = new StringBuilder();
+        Iterator<Map.Entry<String, Integer>> iterator = sortedLemmaIndexes.entrySet().iterator();
         Map.Entry<String, Integer> prevEntry = iterator.next();
-        int shorts = integerList1.size();
+        int shorts = sortedLemmaIndexes.size();
 
         while (iterator.hasNext()) {
             Map.Entry<String, Integer> currentEntry = iterator.next();
             int currentValue = currentEntry.getValue();
             int prevValue = prevEntry.getValue();
             int difference = currentValue - prevValue;
-
-            int endIndex = -1;
-            if (!string.isEmpty()) {
-                endIndex = string.indexOf(" ", prevValue + 1);
-            }
-
-            if (endIndex == -1) {
-                endIndex = string.length();
-            }
-
+            int endIndex = findEndIndex(text, prevValue);
             int to = endIndex;
-            if (difference < 240 / shorts) {
-                String snippet = "<b>" + string.substring(prevValue, to) + "</b>" + string.substring(to, currentValue - 1) + " ";
-                builder1.append(snippet);
-            } else {
-                String snippet = "<b>" + string.substring(prevValue, to) + "</b>" + string.substring(to, to + 240 / shorts);
-                snippet += "... ";
-                builder1.append(snippet);
-            }
+            String snippet = createSnippet(text, prevValue, to, currentValue, difference, shorts);
+            builder.append(snippet);
             prevEntry = currentEntry;
         }
-        int endIndex = string.indexOf(" ", prevEntry.getValue() + 1);
-        if (endIndex == -1) {
-            endIndex = string.length();
-        }
+
+        int endIndex = findEndIndex(text, prevEntry.getValue());
         int to = endIndex;
-        int endShort = 240 - builder1.length() - (to - prevEntry.getValue()) - 3;
-        String snippet = "<b>" + string.substring(prevEntry.getValue(), to) + "</b>" + string.substring(to, to + endShort);
-        snippet += "... ";
-
-        builder1.append(snippet);
-        string = builder1.toString();
-
-        return string;
+        int endShort = calculateEndShort(builder, text, prevEntry, to, shorts);
+        String snippet = createEndSnippet(text, prevEntry.getValue(), to, endShort);
+        builder.append(snippet);
+        return builder.toString();
     }
 
+    private int findEndIndex(String text, int prevValue) {
+        int endIndex = -1;
+        if (!text.isEmpty()) {
+            endIndex = text.indexOf(" ", prevValue + 1);
+        }
+        if (endIndex == -1) {
+            endIndex = text.length();
+        }
+        return endIndex;
+    }
+
+    private String createSnippet(String text, int prevValue, int to, int currentValue, int difference, int shorts) {
+        if (difference < 240 / shorts) {
+            return "<b>" + text.substring(prevValue, to) + "</b>" + text.substring(to, currentValue - 1) + " ";
+        } else {
+            return "<b>" + text.substring(prevValue, to) + "</b>" + text.substring(to, to + 240 / shorts) + "... ";
+        }
+    }
+
+    private int calculateEndShort(StringBuilder builder, String text, Map.Entry<String, Integer> prevEntry, int to, int shorts) {
+        int endShort = 240 - builder.length() - (to - prevEntry.getValue()) - 3;
+        return endShort;
+    }
+
+    private String createEndSnippet(String text, int prevValue, int to, int endShort) {
+        return "<b>" + text.substring(prevValue, to) + "</b>" + text.substring(to, to + endShort) + "... ";
+    }
 
     public <K, V extends Comparable<? super V>> Map<K, V>
     sortMapByValue(Map<K, V> map) {

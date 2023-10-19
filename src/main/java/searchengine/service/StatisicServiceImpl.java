@@ -5,7 +5,7 @@ import searchengine.models.Status;
 import searchengine.dto.statisticDTO.StatisticsDetailedDTO;
 import searchengine.dto.statisticDTO.StatisticsDTO;
 import searchengine.dto.statisticDTO.StatisticsTotalDTO;
-import searchengine.controllers.responses.StatisticApiResponse;
+import searchengine.responses.StatisticApiResponse;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.stereotype.Service;

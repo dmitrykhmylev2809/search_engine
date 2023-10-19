@@ -2,7 +2,7 @@ package searchengine.controllers;
 
 import searchengine.morphology.QueryToLemmaList;
 import searchengine.service.SearchService;
-import searchengine.controllers.responses.ApiResponse;
+import searchengine.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

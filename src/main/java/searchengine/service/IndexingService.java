@@ -1,6 +1,6 @@
 package searchengine.service;
 
-import searchengine.controllers.responses.ApiResponse;
+import searchengine.responses.ApiResponse;
 
 public interface IndexingService {
     ApiResponse startIndexing();

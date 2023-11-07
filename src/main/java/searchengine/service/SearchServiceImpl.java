@@ -53,11 +53,8 @@ public class SearchServiceImpl implements SearchService {
             log.warn("Задан пустой поисковый запрос");
             return response;
         }
-        if (url.equals("")) {
-            return searchService(queryToLemmaList, null, offset, limit);
-        } else {
-            return searchService(queryToLemmaList, url, offset, limit);
-        }
+        return searchService(queryToLemmaList, url.equals("") ? null : url, offset, limit);
+
     }
 
     private ApiResponse searchService(QueryToLemmaList query, String url, int offset, int limit) {
@@ -66,7 +63,6 @@ public class SearchServiceImpl implements SearchService {
         if (url == null) {
             for (Site s : siteList) {
                 Map<Page, Double> list = searching(query, s.getId());
-
                 listOfSearchData.addAll(getSortedSearchData(list, query));
             }
         } else {
@@ -96,7 +92,7 @@ public class SearchServiceImpl implements SearchService {
         List<Lemma> reqLemmas = sortedReqLemmas(queryToLemmaList, siteId);
         List<Integer> pageIndexes = new ArrayList<>();
 
-        if (!reqLemmas.isEmpty()) {
+        if (reqLemmas.size() == queryToLemmaList.getReqLemmas().size()) {
             pageIndexes = getPageIndexes(reqLemmas);
             Map<Page, Double> pageAbsRelevance = calculatePageAbsRelevance(pageIndexes, reqLemmas, siteId);
 
@@ -137,9 +133,9 @@ public class SearchServiceImpl implements SearchService {
 
             if (opPage.isPresent()) {
                 Page page = opPage.get();
-                double r = getAbsRelevance(page, reqLemmas);
-                pageAbsRelevance.put(page, r);
-                maxRel = Math.max(maxRel, r);
+                double rank = getAbsRelevance(page, reqLemmas);
+                pageAbsRelevance.put(page, rank);
+                maxRel = Math.max(maxRel, rank);
             }
         }
 
@@ -178,14 +174,14 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private double getAbsRelevance(Page page, List<Lemma> lemmas) {
-        double r = 0.0;
+        double rank = 0.0;
         int pageId = page.getId();
         for (Lemma lemma : lemmas) {
             int lemmaId = lemma.getId();
             Indexing indexing = indexRepository.findByLemmaIdAndPageId(lemmaId, pageId);
-            r = r + indexing.getRank();
+            rank = rank + indexing.getRank();
         }
-        return r;
+        return rank;
     }
 
 
@@ -193,8 +189,12 @@ public class SearchServiceImpl implements SearchService {
         SearchDataDTO response = new SearchDataDTO();
         Site site = siteRepository.findById(page.getSiteId());
         String siteUrl = site.getUrl();
+
         String siteName = site.getName();
         String uri = page.getPath();
+
+        log.info("найдены ссылки на страницах - " + uri);
+
         String title = getTitle(page.getContent());
         String snippet = getSnippet(page.getContent(), queryToLemmaList);
         response.setSite(siteUrl);
@@ -247,9 +247,8 @@ public class SearchServiceImpl implements SearchService {
         Map<String, Integer> lemmaIndexes = new HashMap<>();
 
         for (String s : req) {
-            lemmaIndexes.put(s, analyzer.findLemmaIndexInText(text, s).get(0));
+           lemmaIndexes.put(s, analyzer.findLemmaIndexInText(text, s).get(0));
         }
-
         return lemmaIndexes;
     }
 
@@ -291,11 +290,8 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private String createSnippet(String text, int prevValue, int to, int currentValue, int difference, int shorts) {
-        if (difference < 240 / shorts) {
-            return "<b>" + text.substring(prevValue, to) + "</b>" + text.substring(to, currentValue - 1) + " ";
-        } else {
-            return "<b>" + text.substring(prevValue, to) + "</b>" + text.substring(to, to + 240 / shorts) + "... ";
-        }
+        return "<b>" + text.substring(prevValue, to) + "</b>" +
+                (difference < 240 / shorts ? text.substring(to, currentValue - 1) : text.substring(to, to + 240 / shorts) + "... ") + " ";
     }
 
     private int calculateEndShort(StringBuilder builder, String text, Map.Entry<String, Integer> prevEntry, int to, int shorts) {
@@ -304,7 +300,8 @@ public class SearchServiceImpl implements SearchService {
     }
 
     private String createEndSnippet(String text, int prevValue, int to, int endShort) {
-        return "<b>" + text.substring(prevValue, to) + "</b>" + text.substring(to, to + endShort) + "... ";
+        return "<b>" + text.substring(prevValue, to) + "</b>" +
+                (text.length() > ( to + endShort ) ? text.substring(to, to + endShort) + "..." : text.substring(to)) + " ";
     }
 
     public <K, V extends Comparable<? super V>> Map<K, V>

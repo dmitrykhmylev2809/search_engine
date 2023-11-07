@@ -74,6 +74,7 @@ public class MorphologyAnalyzer {
     public ArrayList<Integer> findLemmaIndexInText(String text, String lemma) {
         ArrayList<Integer> listOfIndexes = new ArrayList<>();
         String[] list = text.split("[—]|\\p{Punct}|\\s");
+
         int index = 0;
         for(String s1 : list) {
             List<String> lemmas = new ArrayList<>();
@@ -86,6 +87,9 @@ public class MorphologyAnalyzer {
             for(String s2 : lemmas) {
                 if (s2.equals(lemma)){
                     listOfIndexes.add(index);
+
+                    return listOfIndexes;
+
                 }
             }
             index += s1.length() + 1;

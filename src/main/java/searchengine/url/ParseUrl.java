@@ -30,7 +30,7 @@ public class ParseUrl extends RecursiveTask<Set<String>> {
     @Override
     protected Set<String> compute() {
         try {
-            Connection.Response response = Jsoup.connect(url).ignoreContentType(true).timeout(25000).execute();
+            Connection.Response response = Jsoup.connect(url).ignoreContentType(true).timeout(50000).execute();
             int statusCode = response.statusCode();
             if (statusCode == 200) {
                 Document doc = response.parse();
